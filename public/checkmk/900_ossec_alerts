@@ -1,0 +1,19 @@
+#!/bin/bash
+
+ALERT_FILE="/var/ossec/logs/alerts/alerts.log"
+MIN_LEVEL=7
+
+COUNT=$(awk -v minlvl=$MIN_LEVEL '
+  /Rule:/ {
+    if (match($0, /\(level ([0-9]+)\)/, arr)) {
+      if (arr[1] >= minlvl) count++
+    }
+  }
+  END {print count+0}
+' "$ALERT_FILE")
+
+if [ "$COUNT" -gt 0 ]; then
+  echo "2 OSSEC_Alerts count=$COUNT;$MIN_LEVEL;0 - $COUNT critical OSSEC alerts"
+else
+  echo "0 OSSEC_Alerts count=0;0;0 - No critical OSSEC alerts"
+fi

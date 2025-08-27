@@ -1,0 +1,32 @@
+#!/bin/bash
+# Fail2ban Checkmk local check
+
+# Get list of jails
+jails=$(fail2ban-client status | grep "Jail list:" | cut -d: -f2 | sed 's/,//g')
+
+overall_banned=0
+output=""
+
+for jail in $jails; do
+    banned=$(fail2ban-client status $jail | awk '/Currently banned/ {print $NF}')
+    overall_banned=$((overall_banned + banned))
+
+    if [ "$banned" -gt 0 ]; then
+        state=2   # WARN if something is banned
+    else
+        state=0   # OK
+    fi
+
+    output+="$state \"Fail2ban_$jail\" banned=$banned;0;0;0; \"Jail $jail banned IPs: $banned\"\n"
+done
+
+# Summary check
+if [ "$overall_banned" -gt 0 ]; then
+    state=2
+else
+    state=0
+fi
+output+="$state \"Fail2ban_total\" total_banned=$overall_banned;0;0;0; \"Total banned IPs: $overall_banned\""
+
+# Print in Checkmk format
+echo -e "$output"

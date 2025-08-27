@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Count non-header lines in iptables rules
+RULES=$(iptables -S | grep -v "^-P" | wc -l)
+
+if [ "$RULES" -gt 0 ]; then
+    echo "0 Iptables_Up - Iptables is active with $RULES rules"
+else
+    echo "2 Iptables_Up - Iptables is empty or inactive"
+fi
+
