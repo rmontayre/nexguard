@@ -1,0 +1,8 @@
+#!/bin/bash
+# Local Checkmk plugin: Fail2Ban service status
+
+if systemctl is-active --quiet fail2ban; then
+    echo "0 Fail2Ban - running"
+else
+    echo "2 Fail2Ban - NOT running"
+fi
